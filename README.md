@@ -2,5 +2,5 @@
 Project Opeartion system
 
 Group:
-21120235 - Trần Anh Duy
+21120235 - Trần Anh Duy \n
 21120253 - Huỳnh Quốc Huy
