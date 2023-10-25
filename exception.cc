@@ -109,6 +109,7 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		case SC_Create:
+			DEBUG('u',"-------------------------\nSystem call Create")
 			int firstAdd;
 			char* filename;
 			DEBUG('u',"Reading first address of filename");
@@ -116,19 +117,20 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG('u',"Coppy filename");
 			filename = User2System(firstAdd,MaxFileLength + 1);
 			if(filename == NULL){
-				printf("Not enough memory in system");
+				printf("Not enough memory in system\n");
 				DEBUG('u',"Not enough money in system");
 				kernel->machine->WriteRegister(2,-1);
 				DEBUG('u',"Finish reading");
 			}
 			else{
 				if(kernel->fileSystem->Create(filename,0) == false){
-					printf("\n Error create file '%s'", filename);
+					printf("Error create file '%s'\n", filename);
 					DEBUG('u',"Error create file");
 					kernel->machine->WriteRegister(2, -1);
 				}
 				else{
 					DEBUG('u',"Create file succesfull");
+					printf("Create file '%s' successfull\n", filename);
 					kernel->machine->WriteRegister(2, 0);
 				}
 				
@@ -139,10 +141,92 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 
 			return;
+			ASSERTNOTREACHED();
 			break;
 
+		case SC_Open:
+			DEBUG('u',"-------------------------\nSystem call Open")
+			DEBUG('u',"Reading first address of file name and type");
+			firstAdd = kernel->machine->ReadRegister(4);
+			int type;
+			type = kernel->machine->ReadRegister(5);
+			char* filenameopen;
+			if(type!=0 && type!=1){
+				DEBUG('u',"Type are not 0 and 1");
+				printf("Type must be 0 or 1\n");
+				kernel->machine->WriteRegister(4,-1);
+			}
+			else{
+				DEBUG('u',"Find the slot free in table");
+				int index = kernel->fileSystem->findIndexFree();
+				if(index == -1){
+					DEBUG('u',"Table is Full");
+					printf("Table is full! there are many files opened in the same time\n");
+					kernel->machine->WriteRegister(2,-1);
+				}
+				else{
+					DEBUG('u',"Coppy filename from user space to kernel space");
+					filenameopen = User2System(firstAdd,MaxFileLength+1);
+					if(filenameopen == NULL){
+						printf("Not enough memory in system\n");
+						DEBUG('u',"Not enough money in system");
+						kernel->machine->WriteRegister(2,-1);
+						DEBUG('u',"Finish open");
+					}
+					else{
+						if((kernel->fileSystem->openfile[index] = kernel->fileSystem->Open(filenameopen,type)) == NULL){
+							DEBUG('u',"File is not Exist!");
+							printf("We are try to open a file that a not exist!\n");
+							kernel->machine->WriteRegister(2,-1);
+						}
+						else{
+							kernel->machine->WriteRegister(2,index);
+							DEBUG('u',"Open file successfull");
+							if(type == 0){
+								printf("Open file read only '%s' successfull with OpenID: '%d'\n",filenameopen,index);
+							}
+							else{
+								printf("Open file read and write '%s' successfull with OpenID: '%d'\n",filenameopen,index);
+							}
+						}
+					}
+				}
+			}
 
+			delete filenameopen;
+			DEBUG('u',"System call finish");
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		
+		case SC_Close:
+			DEBUG('u',"-------------------------\nSystem call Close")
+			int id;
+			DEBUG('u',"Read file id which want to close");
+			id  = kernel->machine->ReadRegister(4);
 
+			if(kernel->fileSystem->openfile[id] == NULL){
+				DEBUG('u',"File is not open!");
+				printf("File with ID '%d' is not open\n",id);
+				kernel->machine->WriteRegister(2,-1);
+			}
+			else{
+				DEBUG('u',"Close file successfull!");
+				printf("File with id '%d' has been close\n",id);
+				delete kernel->fileSystem->openfile[id];
+				kernel->fileSystem->openfile[id] = NULL;
+				kernel->machine->WriteRegister(2,0);
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			DEBUG('u',"System call Close finish!");
+			return;
+			ASSERTNOTREACHED();
+			break;
 
 		case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
