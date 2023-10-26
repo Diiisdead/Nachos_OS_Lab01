@@ -109,7 +109,6 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		case SC_Create:
-			DEBUG('u',"-------------------------\nSystem call Create")
 			int firstAdd;
 			char* filename;
 			DEBUG('u',"Reading first address of filename");
@@ -117,23 +116,22 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG('u',"Coppy filename");
 			filename = User2System(firstAdd,MaxFileLength + 1);
 			if(filename == NULL){
-				printf("Not enough memory in system\n");
+				printf("Not enough memory in system");
 				DEBUG('u',"Not enough money in system");
 				kernel->machine->WriteRegister(2,-1);
 				DEBUG('u',"Finish reading");
 			}
 			else{
 				if(kernel->fileSystem->Create(filename,0) == false){
-					printf("Error create file '%s'\n", filename);
+					printf("\n Error create file '%s'", filename);
 					DEBUG('u',"Error create file");
 					kernel->machine->WriteRegister(2, -1);
 				}
 				else{
 					DEBUG('u',"Create file succesfull");
-					printf("Create file '%s' successfull\n", filename);
 					kernel->machine->WriteRegister(2, 0);
 				}
-				
+
 			}
 			delete filename;
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
@@ -141,10 +139,9 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 
 			return;
-			ASSERTNOTREACHED();
 			break;
 
-		case SC_Open:
+    case SC_Open:
 			DEBUG('u',"-------------------------\nSystem call Open")
 			DEBUG('u',"Reading first address of file name and type");
 			firstAdd = kernel->machine->ReadRegister(4);
@@ -182,7 +179,7 @@ void ExceptionHandler(ExceptionType which)
 						else{
 							kernel->machine->WriteRegister(2,index);
 							DEBUG('u',"Open file successfull");
-							if(type == 0){
+							if(type == 1){
 								printf("Open file read only '%s' successfull with OpenID: '%d'\n",filenameopen,index);
 							}
 							else{
@@ -201,7 +198,7 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
 			break;
-		
+
 		case SC_Close:
 			DEBUG('u',"-------------------------\nSystem call Close")
 			int id;
@@ -227,6 +224,106 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
 			break;
+
+
+        case SC_Read:
+        {
+            DEBUG('u', "-------------------------\nSystem call Read\n");
+            int bufferAddr = kernel->machine->ReadRegister(4);
+            int size = kernel->machine->ReadRegister(5);
+            int fileId = kernel->machine->ReadRegister(6);
+
+            int bytesRead;
+
+            char *buf = new char[size];
+            buf = User2System(bufferAddr, size);
+            if  (fileId < 0|| fileId > 20) {
+                    printf("File with ID '%d' is out of range \n",fileId);
+                    kernel->machine->WriteRegister(2,-1);
+            }  else {
+                   bytesRead = SysRead(buf, size, fileId);
+                   kernel->machine->WriteRegister(2, bytesRead);
+                   System2User(bufferAddr, bytesRead, buf);
+
+            }
+            delete[] buf;
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+            kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            return;
+            ASSERTNOTREACHED();
+            break;
+
+
+        }
+
+
+        case SC_Write:
+        {
+            // Input: buffer(char*), so ky tu(int), id cua file(OpenFileID)
+            DEBUG('u', "-------------------------\nSystem call Write\n");
+            int bufferAddr = kernel->machine->ReadRegister(4);
+            int size = kernel->machine->ReadRegister(5);
+            int fileId = kernel->machine->ReadRegister(6);
+
+            char *buf = new char[size];
+            int bytesWritten = 0;
+
+            if  (fileId < 0 || fileId > 20) {
+                    printf("File with ID '%d' is out of range \n",fileId);
+                    kernel->machine->WriteRegister(2,-1);
+            }else if ( kernel->fileSystem->openfile[fileId]->type ==1) {
+                printf("Writing no allowed \n");
+                kernel->machine->WriteRegister(2,-1);
+            } else {
+                buf  = User2System(bufferAddr, size);
+                bytesWritten = SysWrite(buf, size, fileId);
+                kernel->machine->WriteRegister(2, bytesWritten);
+                System2User(bufferAddr, bytesWritten, buf);
+                printf("Finish writing \n");
+
+            }
+
+            delete[] buf;
+
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+            kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            return;
+            ASSERTNOTREACHED();
+            break;
+        }
+
+        case SC_Seek:
+        {
+            DEBUG('u', "-------------------------\nSystem call Seek\n");
+            int pos = kernel->machine->ReadRegister(4);
+            int fileId = kernel->machine->ReadRegister(5);
+
+            if  (fileId < 2 || fileId > 20) {
+                    printf("File with ID '%d' is out of range \n",fileId);
+                    kernel->machine->WriteRegister(2,-1);
+            }else if ( kernel->fileSystem->openfile[fileId]  == NULL) {
+                printf("file don't exit \n");
+                kernel->machine->WriteRegister(2,-1);
+            } else {
+                pos = (pos == -1) ?kernel->fileSystem->openfile[fileId] ->Length() : pos;
+                if (pos > kernel->fileSystem->openfile[fileId]->Length() || pos < 0) {
+                    printf("\nCan't seek to this position.");
+                    kernel->machine->WriteRegister(2, -1);
+                } else {
+                    kernel->fileSystem->openfile[fileId]->Seek(pos);
+                    kernel->machine->WriteRegister(2, pos);
+                }
+            }
+
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+            kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+            return;
+            ASSERTNOTREACHED();
+            break;
+        }
 
 		case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
@@ -257,6 +354,7 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 
 			break;
+
 
 		default:
 			cerr << "Unexpected system call " << type << "\n";
