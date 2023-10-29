@@ -76,6 +76,12 @@ public:
 		return Tell(file);
 	}
 
+        int Seek(int pos) {
+		Lseek(file, pos, 0);
+		currentOffset = Tell(file);
+		return currentOffset;
+	}
+
 private:
 	int file;
 	int currentOffset;
