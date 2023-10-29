@@ -58,7 +58,8 @@ int SynchConsoleInput::GetString(char *buffer, int size) {
     for (; i < size; ++i) {
         buffer[i] = GetChar();
         if (buffer[i] == EOF) {
-            return i;
+            buffer[i] = 0;
+            return -2;
         }
     }
     return size;
@@ -119,8 +120,8 @@ SynchConsoleOutput::PutChar(char ch)
 
 int SynchConsoleOutput::PutString(char *buffer, int size) {
     int i = 0;
-    for (; i < size-1; ++i) PutChar(buffer[i]);
-    return i;
+    for (; i < size; ++i) PutChar(buffer[i]);
+    return size;
 }
 
 //----------------------------------------------------------------------

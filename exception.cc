@@ -66,6 +66,10 @@ int System2User(int virtAddr, int len, char *buffer)
 	} while (i < len && oneChar != 0);
 	return i;
 }
+
+
+
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -272,6 +276,12 @@ void ExceptionHandler(ExceptionType which)
             if  (fileId < 0 || fileId > 20) {
                     printf("File with ID '%d' is out of range \n",fileId);
                     kernel->machine->WriteRegister(2,-1);
+            }else if (fileId == 1) {
+                buf  = User2System(bufferAddr, size);
+                bytesWritten = SysWrite(buf, size, fileId);
+                kernel->machine->WriteRegister(2, bytesWritten);
+                System2User(bufferAddr, bytesWritten, buf);
+                printf("Finish writing \n");
             }else if ( kernel->fileSystem->openfile[fileId]->type ==1) {
                 printf("Writing no allowed \n");
                 kernel->machine->WriteRegister(2,-1);
