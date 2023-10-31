@@ -34,6 +34,23 @@ int SysRead(char* buffer, int charCount, int fileId) {
     return kernel->fileSystem->openfile[fileId]->Read(buffer, charCount);
 }
 
+char*  SysReadString( int length)
+{
+	char *buffer = new char[length + 1];
+
+	int i = -1;
+	while (i < length)
+	{
+		char c = kernel->synchConsoleIn->GetChar();
+		if (c != '\n')
+			buffer[++i] = c;
+		else
+			break;
+	}
+	buffer[i + 1] = 0;
+	return buffer;
+}
+
 int SysWrite(char* buffer, int charCount, int fileId) {
     if (fileId == 1) {
         return kernel->synchConsoleOut->PutString(buffer, charCount);

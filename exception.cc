@@ -203,6 +203,7 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 
+
 		case SC_Close:
 			DEBUG('u',"-------------------------\nSystem call Close")
 			int id;
@@ -229,6 +230,23 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 
+        case SC_ReadString:
+        {
+             int bufferAddr = kernel->machine->ReadRegister(4);
+             int size = kernel->machine->ReadRegister(5);
+
+            char* buf = SysReadString(size);
+
+            System2User(bufferAddr,size,buf);
+            delete[] buf;
+
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
 
         case SC_Read:
         {
@@ -281,6 +299,7 @@ void ExceptionHandler(ExceptionType which)
                 bytesWritten = SysWrite(buf, size, fileId);
                 kernel->machine->WriteRegister(2, bytesWritten);
                 System2User(bufferAddr, bytesWritten, buf);
+                printf(" \n");
                 printf("Finish writing \n");
             }else if ( kernel->fileSystem->openfile[fileId]->type ==1) {
                 printf("Writing no allowed \n");
@@ -290,6 +309,7 @@ void ExceptionHandler(ExceptionType which)
                 bytesWritten = SysWrite(buf, size, fileId);
                 kernel->machine->WriteRegister(2, bytesWritten);
                 System2User(bufferAddr, bytesWritten, buf);
+                printf(" \n");
                 printf("Finish writing \n");
 
             }
