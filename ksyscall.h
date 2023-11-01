@@ -30,6 +30,7 @@ int SysAdd(int op1, int op2)
 int SysRead(char* buffer, int charCount, int fileId) {
     if (fileId == 0) {
         return kernel->synchConsoleIn->GetString(buffer, charCount);
+
     }
     return kernel->fileSystem->openfile[fileId]->Read(buffer, charCount);
 }

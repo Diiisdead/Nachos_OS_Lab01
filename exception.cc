@@ -256,13 +256,20 @@ void ExceptionHandler(ExceptionType which)
             int fileId = kernel->machine->ReadRegister(6);
 
             int bytesRead;
+            char*buf = new char[size];
 
-            char *buf = new char[size];
-            buf = User2System(bufferAddr, size);
+
             if  (fileId < 0|| fileId > 20) {
                     printf("File with ID '%d' is out of range \n",fileId);
                     kernel->machine->WriteRegister(2,-1);
-            }  else {
+            }  else if (fileId == 0) {
+
+                   bytesRead = SysRead(buf, size, fileId);
+                   kernel->machine->WriteRegister(2, bytesRead);
+                   System2User(bufferAddr, size, buf);
+            } else {
+
+                   buf = User2System(bufferAddr, size);
                    bytesRead = SysRead(buf, size, fileId);
                    kernel->machine->WriteRegister(2, bytesRead);
                    System2User(bufferAddr, bytesRead, buf);

@@ -5,18 +5,18 @@ int main()
 {
   int id; 
   int fileSize;
+  int len;
   int i;
   char buf[100];
   char buf1[1000];
   char c;
   
   Write("Enter file name",16, 1);
-  Create("test.txt");
   //id = Open("test.txt",0);
   
 
-  ReadString(buf, 100);
-  Write(buf, 100, 1);
+  len = Read(buf, 98, 0);
+  Write(buf, 98, 1);
   //Close(id);
   
   id = Open(buf,0);

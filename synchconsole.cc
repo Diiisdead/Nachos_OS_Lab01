@@ -55,14 +55,17 @@ SynchConsoleInput::GetChar()
 
 int SynchConsoleInput::GetString(char *buffer, int size) {
     int i = 0;
-    for (; i < size; ++i) {
-        buffer[i] = GetChar();
-        if (buffer[i] == EOF) {
-            buffer[i] = 0;
-            return -2;
+    char c;
+    while (i < size - 1) {
+        c = kernel->synchConsoleIn->GetChar();
+        if (c == '\n' || c == '\0') {
+            break;
         }
+        buffer[i] = c;
+        i++;
     }
-    return size;
+    buffer[i] = '\0';
+    return i;
 }
 
 //----------------------------------------------------------------------
