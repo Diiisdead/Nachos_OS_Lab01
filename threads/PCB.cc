@@ -90,7 +90,7 @@ void PCB::DecNumWait()
 
 void PCB::SetExitCode(int ec)
 {
-    exitcode = exit_code;
+    exitcode = ec;
 }
 
 int PCB::GetExitCode()
@@ -100,7 +100,7 @@ int PCB::GetExitCode()
 
 void PCB::SetFileName(char *fn)
 {
-    strcpy(thread->name, filename);
+    strcpy(thread->name, fn);
 }
 
 char *PCB::GetFileName()
