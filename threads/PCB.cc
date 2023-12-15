@@ -88,7 +88,7 @@ void PCB::DecNumWait()
     multex->V();
 }
 
-void PCB::SetExitCode(int exit_code)
+void PCB::SetExitCode(int ec)
 {
     exitcode = exit_code;
 }
@@ -98,7 +98,7 @@ int PCB::GetExitCode()
     return exitcode;
 }
 
-void PCB::SetFileName(char *filename)
+void PCB::SetFileName(char *fn)
 {
     strcpy(thread->name, filename);
 }
