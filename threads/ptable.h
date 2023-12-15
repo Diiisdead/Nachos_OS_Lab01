@@ -3,16 +3,20 @@
 
 #include "bitmap.h"
 #include "PCB.h"
+#include "synch.h"
 
 
 #define MAX_PROCESS 10
+
+class PCB;
+class Semaphore;
 
 class PTable
 {
 private:
     int psize;
     Bitmap *bm;
-    PCB *pcp[MAX_PROCESS];
+    PCB *pcb[MAX_PROCESS];
     Semaphore* bmsem;
 
 public:
@@ -23,7 +27,7 @@ public:
     int ExitUpdate(int);
     int JoinUpdate(int);
 
-    int GetFreeSlot;
+    int GetFreeSlot();
     bool IsExist(int pid);
 
     void Remove(int pid);

@@ -54,7 +54,7 @@ int PTable::ExecUpdate(char *name)
         return -1;
     }
 
-    pcb[index] = new PCB();
+    pcb[index] = new PCB(index);
     pcb[index]->parentID = kernel->currentThread->processID;
 
     int pid = pcb[index]->Exec(name, index);
@@ -95,7 +95,7 @@ int PTable::ExitUpdate(int ec)
 int PTable::JoinUpdate(int id)
 {
 
-    if (id < 0 || id >= psize || pcd[id] == NULL)
+    if (id < 0 || id >= psize || pcb[id] == NULL)
     {
         printf("Invalid ID\n");
         return -1;

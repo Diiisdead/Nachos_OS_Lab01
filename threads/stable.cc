@@ -33,13 +33,13 @@ int STable::Create(char *name, int init)
         }
     }
 
-    int index = FindFreeSlot();
+    int index = FindFreeSlot(index);
     if (index < 0)
     {
         return -1;
     }
 
-    semTab[id] = new Sem(name, init);
+    semTab[index] = new Sem(name, init);
     return 0;
 }
 

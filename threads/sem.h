@@ -1,35 +1,21 @@
 #ifndef SEM_H
 #define SEM_H
 #include "synch.h"
+#include "string.h"
 
+class Semaphore;
 
-//class Semaphore;
-
-class Sem {
-   private:
+class Sem
+{
+private:
     char name[50];
-    Semaphore* sem;
-    
-   public:
-    Sem(char* na, int i) {
-        strcpy(this->name, na);
-        sem = new Semaphore(this->name, i);
-    }
-    ~Sem() {
-        if (sem) delete sem;
-    }
+    Semaphore *sem;
 
-    void wait() {
-        sem->P();
-    }
-
-    void signal() {
-        sem->V();
-    }
-
-    char* GetName() {
-        return this->name;
-    }
+public:
+    Sem(char *na, int i);
+    ~Sem();
+    void wait();
+    void signal();
+    char *GetName();
 };
-
 #endif

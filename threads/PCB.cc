@@ -1,25 +1,32 @@
 #include "PCB.h"
-
+#define MAX_FILE 10
 PCB::PCB(int id) {
     parentID = id;
-    joinsem = new Semaphore(0); 
-    exitsem = new Semaphore(0); 
-    mutex = new Semaphore(1); 
+    joinsem = new Semaphore("joinsem", 0);
+    exitsem = new Semaphore("exitsem", 0);
+    multex = new Semaphore("multex", 1);
     exitcode = 0;
     numwait = 0;
-    filename = nullptr;
+    
+    fileTable = new FILE *[MAX_FILE];
+    filemap = new Bitmap(MAX_FILE);
+    filemap->Mark(0);
+    filemap->Mark(1);
+
+    thread = NULL;
 }
 
 PCB::~PCB() {
     delete joinsem;
     delete exitsem;
-    delete mutex;
-    delete[] filename;
+    delete multex;
+    delete filemap;
+    delete fileTable;
 }
 
 int PCB::Exec(char* name, int pid) {
     multex->P();
-    this->thread = new thread(filename);
+    this->thread = new Thread(name);
 
     if (this->thread == NULL) {
         printf("\nPCB::Exec: Not enough memory!\n");
@@ -30,7 +37,7 @@ int PCB::Exec(char* name, int pid) {
     this->thread->processID = pid;
     this->parentID = kernel->currentThread->processID;
     
-    this->thread->Fork(StartProcess_2, &this->thread->processID);
+    //● Call Fork(StartProcess_2,id)
 
     multex->V();
     return pid;

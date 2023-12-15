@@ -33,6 +33,8 @@ class Semaphore;
 #include "bitmap.h"
 #include "stable.h"
 #include "ptable.h"
+class PTable;
+class STable;
 
 class Kernel {
   public:

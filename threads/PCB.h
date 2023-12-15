@@ -24,10 +24,10 @@ public:
     Bitmap *filemap;
 
 public:
-    PCB();
+    PCB(int id);
     ~PCB();
 
-    int Exec(char *filename, int pid);
+    int Exec(char *name, int pid);
 
     int GetID();
     int GetNumWait();
@@ -49,4 +49,4 @@ public:
 
 void StartProcess(int id);
 
-#endif
+#endif // PCB_H
