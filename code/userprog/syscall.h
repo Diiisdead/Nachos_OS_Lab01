@@ -19,9 +19,6 @@
  * is being asked for
  */
 #define SC_Halt		0
-#define SC_Exit		1
-#define SC_Exec		2
-#define SC_Join		3
 #define SC_Create	4
 #define SC_Remove       5
 #define SC_Open		6
@@ -45,6 +42,13 @@
 #define SC_PrintString  24
 #define SC_Toupper  25
 #define SC_ReadString  26
+#define SC_Exec 30
+#define SC_Join 31
+#define SC_Exit 32
+#define SC_CreateSemaphore  33
+#define SC_Wait   34
+#define SC_Signal 35
+
 #define SC_Add		42
 
 #ifndef IN_ASM
@@ -106,6 +110,13 @@ SpaceId ExecV(int argc, char* argv[]);
  * Return the exit status.
  */
 int Join(SpaceId id); 	
+
+void Exit(int exitCode);
+
+int CreateSemaphore(char* name,int semval);
+
+int Wait(char* name);
+int Signal(char* name);
  
 
 /* File system operations: Create, Remove, Open, Read, Write, Close
@@ -194,6 +205,7 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);	
+
 
 #endif /* IN_ASM */
 

@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile cat copy client server client_with_file server_with_file concatenate delete
+PROGRAMS = add halt shell matmult sort segments createfile cat copy client server client_with_file server_with_file concatenate delete testThread proc1 proc2
 endif
 
 all: $(PROGRAMS)
@@ -125,6 +125,24 @@ halt.o: halt.c
 halt: halt.o start.o
 	$(LD) $(LDFLAGS) start.o halt.o -o halt.coff
 	$(COFF2NOFF) halt.coff halt
+
+testThread.o: testThread.c
+	$(CC) $(CFLAGS) -c testThread.c
+testThread: testThread.o start.o
+	$(LD) $(LDFLAGS) start.o testThread.o -o testThread.coff
+	$(COFF2NOFF) testThread.coff testThread
+
+proc1.o: proc1.c
+	$(CC) $(CFLAGS) -c proc1.c
+proc1: proc1.o start.o
+	$(LD) $(LDFLAGS) start.o proc1.o -o proc1.coff
+	$(COFF2NOFF) proc1.coff proc1
+
+proc2.o: proc2.c
+	$(CC) $(CFLAGS) -c proc2.c
+proc2: proc2.o start.o
+	$(LD) $(LDFLAGS) start.o proc2.o -o proc2.coff
+	$(COFF2NOFF) proc2.coff proc2
 
 createfile.o: createfile.c
 	$(CC) $(CFLAGS) -c createfile.c

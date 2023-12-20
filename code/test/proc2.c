@@ -1,25 +1,13 @@
 #include "syscall.h"
 
-int main()
-{
+int main(){
     int srcId, desId;
     int fileSize, i;
-    char source[100];
-    char destination[100];
     char c;
-
-    // Prompt for source file name
-    Write("Enter source file name: ", 25, 1);
-    Read(source, 98, 0);
-
-    // Prompt for destination file name
-    Write("Enter destination file name: ", 30, 1);
-    Read(destination, 98, 0);
-
+    Write("Procces 2 is starting\n",50,1);
     // Open source and destination files
-    srcId = Open(source, 1);
-    desId = Open(destination, 0);
-
+    srcId = Open("b.txt", 1);
+    desId = Open("a.txt", 0);
     // Check if files opened successfully
     if (srcId == -1 || desId == -1)
     {
@@ -44,9 +32,4 @@ int main()
         Close(srcId);
         Close(desId);
     }
-
-    // Terminate the program
-    Halt();
-
-    /* not reached */
 }

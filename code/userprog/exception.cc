@@ -696,7 +696,7 @@ void ExceptionHandler(ExceptionType which)
 				System2User(bufferAddr, bytesWritten, buf);
 				DEBUG('u',"Write successfull");
 			}
-			DEBUG('u',"System call Read finish");
+			DEBUG('u',"System call Write finish");
 			delete[] buf;
 
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
@@ -821,6 +821,166 @@ void ExceptionHandler(ExceptionType which)
 
 			ASSERTNOTREACHED();
 
+			break;
+		//===============================================================================================
+		case SC_Exec:
+			DEBUG('u', "System call Exec")
+			char *nameExec;
+			DEBUG('u', "Read the name of file");
+			firstAdd = kernel->machine->ReadRegister(4);
+			nameExec = User2System(firstAdd, MaxFileLength + 1);
+			if (nameExec == NULL){
+				DEBUG('u', "Not enough money");
+				kernel->machine->WriteRegister(2,-1);
+			}
+			else{
+				DEBUG('u',"filename "<<nameExec);
+				int result = kernel->pTab->ExecUpdate(nameExec);
+				if (result != -1){
+					DEBUG('u',"Succesfull!");
+				}
+				kernel->machine->WriteRegister(2,result);
+			}
+			DEBUG('u', "System call Exec finish!");
+			DEBUG('u',"-----------------------------------------------");
+
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+
+		//=================================================================================================
+		case SC_Join:
+			id = kernel->machine->ReadRegister(4);
+			DEBUG('u', "System call Join with process "<<id)
+			result = kernel->pTab->JoinUpdate(id);
+			if(result != -1){
+				DEBUG('u', "Join porcess " << id<<" succesfull!");
+			}
+			kernel->machine->WriteRegister(2,result); 
+			DEBUG('u', "System call Join " << id<<" finish!");
+			DEBUG('u',"-----------------------------------------------");
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		
+		//=================================================================================================
+		case SC_Exit:
+			DEBUG('u', "System call Exit")
+			int exit_Status;
+			exit_Status = kernel->machine->ReadRegister(4);
+			result = kernel->pTab->ExitUpdate(exit_Status);
+			if(result != -1){
+				DEBUG('u', "Exit succesfull!");
+			}
+			kernel->machine->WriteRegister(2,result); 
+			DEBUG('u', "System call Exit finish!");
+			DEBUG('u',"-----------------------------------------------");
+
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+
+		//=================================================================================================
+		case SC_CreateSemaphore:
+			DEBUG('u', "System call CreateSemaphore")
+			char* namesem;
+			DEBUG('u', "Read the name of new semaphore");
+			firstAdd = kernel->machine->ReadRegister(4);
+			namesem = User2System(firstAdd, MaxFileLength + 1);
+
+			if (namesem == NULL){
+				DEBUG('u', "Not enough money");
+				kernel->machine->WriteRegister(2,-1);
+			}
+			else{
+				int semval = kernel->machine->ReadRegister(5);
+				if(semval<0){
+					DEBUG('u',"Semaphore's value can not < 0");
+					kernel->machine->WriteRegister(2,-1);
+				}
+				else{
+					int result = kernel->semTab->Create(namesem,semval);
+					if(result == -1){
+						DEBUG('u',"Error!");
+					}
+					else{
+						DEBUG('u',"Create Semaphore Succesfull!");
+					}
+					kernel->machine->WriteRegister(2,result);
+				}
+			}
+
+			DEBUG('u', "System call CreateSemaphore finish!");
+			DEBUG('u',"-----------------------------------------------");
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		
+		//========================================================================================================
+		case SC_Wait:
+			DEBUG('u', "System call Wait");
+            firstAdd = kernel->machine->ReadRegister(4);
+			char* name;
+			name = User2System(firstAdd,MaxFileLength+1);
+			if (name == NULL){
+				DEBUG('u', "Not enough money");
+				kernel->machine->WriteRegister(2,-1);
+			}
+			else{
+				result = kernel->semTab->Wait(name);
+				if(result != -1){
+					DEBUG(dbgSys, "SysWait returning with " << result << "\n");
+				}
+            	kernel->machine->WriteRegister(2,result);
+			}
+			delete name;
+
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			DEBUG('u', "System call Wait finish!");
+			DEBUG('u',"-----------------------------------------------");
+            return;
+            ASSERTNOTREACHED();
+			break;
+
+		//==========================================================================================
+		case SC_Signal:
+			DEBUG('u', "System call Signal");
+            firstAdd = kernel->machine->ReadRegister(4);
+			name = User2System(firstAdd,MaxFileLength+1);
+			if (name == NULL){
+				DEBUG('u', "Not enough money");
+				kernel->machine->WriteRegister(2,-1);
+			}
+			else{
+				result = kernel->semTab->Signal(name);
+				if(result != -1){
+					DEBUG(dbgSys, "SysWait returning with " << result << "\n");
+				}
+            	kernel->machine->WriteRegister(2,result);
+			}
+			delete name;
+
+            kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			DEBUG('u', "System call Signal finish!");
+			DEBUG('u',"-----------------------------------------------");
+            return;
+            ASSERTNOTREACHED();
 			break;
 
 		default:
