@@ -93,6 +93,21 @@ int System2User(int virtAddr, int len, char *buffer)
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+// NoException,           // Everything ok!
+// 		     SyscallException,      // A program executed a system call.
+// 		     PageFaultException,    // No valid translation found
+// 		     ReadOnlyException,     // Write attempted to page marked 
+// 					    // "read-only"
+// 		     BusErrorException,     // Translation resulted in an 
+// 					    // invalid physical address
+// 		     AddressErrorException, // Unaligned reference or one that
+// 					    // was beyond the end of the
+// 					    // address space
+// 		     OverflowException,     // Integer overflow in add or sub.
+// 		     IllegalInstrException, // Unimplemented or reserved instr.
+		     
+// 		     NumExceptionTypes
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -101,6 +116,38 @@ void ExceptionHandler(ExceptionType which)
 
 	switch (which)
 	{
+	case NoException:
+		return;
+		DEBUG('u',"No Exception");
+		break;
+	case PageFaultException:
+		DEBUG('u',"No valid translation found");
+		SysHalt();
+        break;
+	case  BusErrorException:
+		DEBUG('u',"naligned reference or one that was beyond the end of the address space");
+		SysHalt();
+        break;
+	case ReadOnlyException:
+		DEBUG('u',"Write attempted to page marked read-only");
+		SysHalt();
+        break;
+	case AddressErrorException:
+		DEBUG('u',"Translation resulted in an invalid physical address");
+		SysHalt();
+        break;
+	case OverflowException:
+		DEBUG('u',"Integer overflow in add or sub");
+		SysHalt();
+        break;
+	case IllegalInstrException:
+		DEBUG('u',"Unimplemented or reserved instr");
+		SysHalt();
+        break;
+	case  NumExceptionTypes:
+		DEBUG('u',"Number exception");
+		SysHalt();
+        break;
 	case SyscallException:
 		switch (type)
 		{
@@ -878,6 +925,8 @@ void ExceptionHandler(ExceptionType which)
 			if(result != -1){
 				DEBUG('u', "Exit succesfull!");
 			}
+			kernel->currentThread->FreeSpace();
+			kernel->currentThread->Finish();
 			kernel->machine->WriteRegister(2,result); 
 			DEBUG('u', "System call Exit finish!");
 			DEBUG('u',"-----------------------------------------------");

@@ -64,22 +64,6 @@ SwapHeader(NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
-<<<<<<< Updated upstream
-    pageTable = new TranslationEntry[NumPhysPages];
-    for (int i = 0; i < NumPhysPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  
-    }
-    
-    // zero out the entire address space
-    bzero(kernel->machine->mainMemory, MemorySize);
-}
-
-=======
     // pageTable = new TranslationEntry[NumPhysPages];
     // for (int i = 0; i < NumPhysPages; i++) {
     // pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
@@ -96,7 +80,6 @@ AddrSpace::AddrSpace()
 
 bool AddrSpace::isuse[NumPhysPages] = {0};
 
->>>>>>> Stashed changes
 //----------------------------------------------------------------------
 // AddrSpace::~AddrSpace
 // 	Dealloate an address space.
@@ -104,15 +87,11 @@ bool AddrSpace::isuse[NumPhysPages] = {0};
 
 AddrSpace::~AddrSpace()
 {
-<<<<<<< Updated upstream
-   delete pageTable;
-=======
     for (int i = 0; i < numPages; i++)
     {
         isuse[pageTable[i].physicalPage] = false;
     }
     delete pageTable;
->>>>>>> Stashed changes
 }
 
 //----------------------------------------------------------------------
@@ -163,8 +142,6 @@ bool AddrSpace::Load(char *fileName)
                                       // at least until we have
                                       // virtual memory
 
-<<<<<<< Updated upstream
-=======
     pageTable = new TranslationEntry[numPages];
     DEBUG(dbgAddr, "Numpages " << numPages);
     int j = 0;
@@ -187,7 +164,6 @@ bool AddrSpace::Load(char *fileName)
         bzero(&(kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
     }
     kernel->addrLock->V();
->>>>>>> Stashed changes
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
     // then, copy in the code and data segments into memory
