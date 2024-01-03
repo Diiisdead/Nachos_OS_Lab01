@@ -96,7 +96,6 @@ int PTable::ExitUpdate(int ec)
 
     pcb[id]->JoinRelease();
     pcb[id]->ExitWait();
-
     Remove(id);
     return ec;
 }
@@ -115,15 +114,14 @@ int PTable::JoinUpdate(int id)
         DEBUG('u',"The process which is joining cannot the parent process");
         return -1;
     }
-    DEBUG('u',"oke");
     pcb[pcb[id]->parentID]->IncNumWait();
-    DEBUG('u',"oke");
     pcb[id]->JoinWait();
     DEBUG('u',"oke");
 
     int ec = pcb[id]->GetExitCode();
+    DEBUG('u',"oke");
     pcb[id]->ExitRelease();
-
+    DEBUG('u',"oke");
     return ec;
 }
 

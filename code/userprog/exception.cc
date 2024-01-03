@@ -684,7 +684,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else if (fileId == 0)
 			{
-
+				DEBUG('u',"size to read: "<<size);
 				bytesRead = SysRead(buf, size, fileId);
 				kernel->machine->WriteRegister(2, bytesRead);
 				System2User(bufferAddr, size, buf);
@@ -899,6 +899,14 @@ void ExceptionHandler(ExceptionType which)
 			break;
 
 		//=================================================================================================
+
+		case SC_ExecV:
+			return;
+			ASSERTNOTREACHED();
+			break;
+
+
+		//=================================================================================================
 		case SC_Join:
 			id = kernel->machine->ReadRegister(4);
 			DEBUG('u', "System call Join with process "<<id)
@@ -925,15 +933,15 @@ void ExceptionHandler(ExceptionType which)
 			if(result != -1){
 				DEBUG('u', "Exit succesfull!");
 			}
+			kernel->machine->WriteRegister(2,result);
 			kernel->currentThread->FreeSpace();
-			kernel->currentThread->Finish();
-			kernel->machine->WriteRegister(2,result); 
-			DEBUG('u', "System call Exit finish!");
-			DEBUG('u',"-----------------------------------------------");
 
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
 			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			DEBUG('u', "System call Exit finish!");
+			DEBUG('u',"-----------------------------------------------");
+			kernel->currentThread->Finish();
 			return;
 			ASSERTNOTREACHED();
 			break;

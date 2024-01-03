@@ -4,10 +4,10 @@ int
 main()
 {
     SpaceId newProc;
-    OpenFileId input = ConsoleInput;
-    OpenFileId output = ConsoleOutput;
+    OpenFileId input = 0;
+    OpenFileId output = 1;
     char prompt[2], ch, buffer[60];
-    int i;
+    int i,len;
 
     prompt[0] = '-';
     prompt[1] = '-';
@@ -18,15 +18,10 @@ main()
 
 	i = 0;
 	
-	do {
-	
-	    Read(&buffer[i], 1, input); 
+	len = Read(buffer, 60, 0);
+    buffer[len] = '\0';
 
-	} while( buffer[i++] != '\n' );
-
-	buffer[--i] = '\0';
-
-	if( i > 0 ) {
+	if( len > 0 ) {
 		newProc = Exec(buffer);
 		Join(newProc);
 	}

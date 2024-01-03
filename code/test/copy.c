@@ -45,8 +45,5 @@ int main()
         Close(desId);
     }
 
-    // Terminate the program
-    Halt();
-
     /* not reached */
 }

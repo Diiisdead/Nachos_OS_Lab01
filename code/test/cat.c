@@ -15,7 +15,6 @@ int main()
 
     // Attempt to open the file
     id = Open(buf, 0);
-
     if (id == -1)
     {
         Write("Error: Unable to open the file", 31, 1);

@@ -87,6 +87,7 @@ bool AddrSpace::isuse[NumPhysPages] = {0};
 
 AddrSpace::~AddrSpace()
 {
+    DEBUG('u',"destructor AddrSpace");
     for (int i = 0; i < numPages; i++)
     {
         isuse[pageTable[i].physicalPage] = false;
@@ -147,7 +148,7 @@ bool AddrSpace::Load(char *fileName)
     int j = 0;
     for (int i = 0; i < numPages; i++)
     {
-        pageTable[i].virtualPage = i; // for now, virtual page # = phys page #
+        pageTable[i].virtualPage = i; 
         while (j < NumPhysPages && isuse[j])
         {
             j++;
